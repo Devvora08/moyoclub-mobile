@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "MoyoClub",
+    "slug": "moyoclub",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#FF6B35"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.moyoclub.app"
+    },
+    "android": {
+      "package": "com.moyoclub.app"
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}

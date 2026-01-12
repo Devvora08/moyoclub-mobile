@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-expo-app@latest moyoClub --template blank)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(mkdir:*)",
+      "Bash(npx tsc:*)",
+      "Bash(tree:*)",
+      "Bash(npx expo start --web)",
+      "mcp__ide__getDiagnostics"
+    ]
+  }
+}

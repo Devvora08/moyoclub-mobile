@@ -1,0 +1,201 @@
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ImageSourcePropType } from 'react-native';
+
+interface HighProteinProductCardProps {
+  name: string;
+  price: number;
+  originalPrice?: number;
+  rating: number;
+  protein: string;
+  calories: string;
+  discount?: string;
+  isOrganic?: boolean;
+  image?: ImageSourcePropType;
+}
+
+const HighProteinProductCard: React.FC<HighProteinProductCardProps> = ({
+  name,
+  price,
+  originalPrice,
+  rating,
+  protein,
+  calories,
+  discount,
+  isOrganic,
+  image,
+}) => {
+  return (
+    <TouchableOpacity style={styles.card}>
+      <View style={styles.imageContainer}>
+        {image && (
+          <Image source={image} style={styles.productImage} resizeMode="cover" />
+        )}
+        {discount && (
+          <View style={styles.discountBadge}>
+            <Text style={styles.discountText}>{discount}</Text>
+          </View>
+        )}
+        {isOrganic && (
+          <View style={styles.organicBadge}>
+            <Text style={styles.organicIcon}>✓</Text>
+            <Text style={styles.organicText}>Organic</Text>
+          </View>
+        )}
+        <View style={styles.ratingBadge}>
+          <Text style={styles.star}>⭐</Text>
+          <Text style={styles.ratingText}>{rating}</Text>
+        </View>
+      </View>
+      <View style={styles.info}>
+        <Text style={styles.name} numberOfLines={2}>
+          {name}
+        </Text>
+        <Text style={styles.nutritionInfo}>
+          {protein} protein • {calories} cal
+        </Text>
+        <View style={styles.priceRow}>
+          <View style={styles.priceContainer}>
+            <Text style={styles.price}>₹{price}</Text>
+            {originalPrice && (
+              <Text style={styles.originalPrice}>₹{originalPrice}</Text>
+            )}
+          </View>
+          <TouchableOpacity style={styles.addButton}>
+            <Text style={styles.addButtonText}>Add</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+const styles = StyleSheet.create({
+  card: {
+    width: 160,
+    marginRight: 12,
+    marginBottom: 8,
+    borderRadius: 12,
+    backgroundColor: '#fff',
+    overflow: 'visible',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  imageContainer: {
+    height: 160,
+    position: 'relative',
+    backgroundColor: '#f5f5f5',
+    overflow: 'hidden',
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
+  productImage: {
+    width: '100%',
+    height: '100%',
+  },
+  discountBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    backgroundColor: '#FF6B35',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  discountText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  organicBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#4CAF50',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  organicIcon: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '700',
+    marginRight: 2,
+  },
+  organicText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  ratingBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  star: {
+    fontSize: 12,
+    marginRight: 2,
+  },
+  ratingText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#1a1a1a',
+  },
+  info: {
+    padding: 12,
+  },
+  name: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    marginBottom: 4,
+  },
+  nutritionInfo: {
+    fontSize: 12,
+    color: '#999',
+    marginBottom: 8,
+  },
+  priceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  price: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FF6B35',
+    marginRight: 6,
+  },
+  originalPrice: {
+    fontSize: 12,
+    color: '#999',
+    textDecorationLine: 'line-through',
+  },
+  addButton: {
+    backgroundColor: '#FF6B35',
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+});
+
+export default HighProteinProductCard;
