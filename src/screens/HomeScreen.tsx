@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import Logo from '../components/Logo';
 import CategoryCard from '../components/CategoryCard';
 import ProductCard from '../components/ProductCard';
 import DeliveryBanner from '../components/DeliveryBanner';
@@ -240,17 +242,22 @@ const HomeScreen = () => {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <Text style={styles.logo}>MoyoClub</Text>
+            <Logo width={140} height={32} />
             <TouchableOpacity style={styles.locationContainer}>
               <Text style={styles.locationIcon}>📍</Text>
               <Text style={styles.locationText}>Delivering to Home</Text>
               <Text style={styles.chevron}>▼</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.premiumButton}>
-            <Text style={styles.star}>⭐</Text>
-            <Text style={styles.premiumText}>Premium</Text>
-          </TouchableOpacity>
+          <View style={styles.headerRight}>
+            <TouchableOpacity style={styles.premiumButton}>
+              <Text style={styles.star}>⭐</Text>
+              <Text style={styles.premiumText}>Premium</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cartIconButton}>
+              <Ionicons name="cart-outline" size={24} color="#333" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Search Bar */}
@@ -479,6 +486,11 @@ const styles = StyleSheet.create({
   headerLeft: {
     flex: 1,
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
   logo: {
     fontSize: 28,
     fontWeight: '700',
@@ -518,6 +530,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: '700',
+  },
+  cartIconButton: {
+    padding: 4,
   },
   searchContainer: {
     flexDirection: 'row',
