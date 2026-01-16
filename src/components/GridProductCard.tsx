@@ -10,6 +10,7 @@ interface GridProductCardProps {
   discount?: string;
   isOrganic?: boolean;
   image?: ImageSourcePropType;
+  imageUri?: string | null; // Support for remote images
 }
 
 const GridProductCard: React.FC<GridProductCardProps> = ({
@@ -21,24 +22,28 @@ const GridProductCard: React.FC<GridProductCardProps> = ({
   discount,
   isOrganic,
   image,
+  imageUri,
 }) => {
+  // Determine the image source
+  const imageSource = imageUri ? { uri: imageUri } : image;
+
   return (
     <TouchableOpacity style={styles.card}>
       <View style={styles.imageContainer}>
-        {image && (
-          <Image source={image} style={styles.productImage} resizeMode="cover" />
-        )}
-        {discount && (
+        {imageSource ? (
+          <Image source={imageSource} style={styles.productImage} resizeMode="cover" />
+        ) : null}
+        {discount ? (
           <View style={styles.discountBadge}>
             <Text style={styles.discountText}>{discount}</Text>
           </View>
-        )}
-        {isOrganic && (
+        ) : null}
+        {isOrganic ? (
           <View style={styles.organicBadge}>
             <Text style={styles.organicIcon}>✓</Text>
             <Text style={styles.organicText}>Organic</Text>
           </View>
-        )}
+        ) : null}
         <TouchableOpacity style={styles.favoriteButton}>
           <Text style={styles.heartIcon}>♡</Text>
         </TouchableOpacity>
@@ -57,9 +62,9 @@ const GridProductCard: React.FC<GridProductCardProps> = ({
         </Text>
         <View style={styles.priceRow}>
           <Text style={styles.price}>₹{price}</Text>
-          {originalPrice && (
+          {originalPrice ? (
             <Text style={styles.originalPrice}>₹{originalPrice}</Text>
-          )}
+          ) : null}
         </View>
       </View>
     </TouchableOpacity>

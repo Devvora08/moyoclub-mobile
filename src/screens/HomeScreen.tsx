@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import api, { initializeApi } from '../api/config';
+import { initializeApi } from '../api/config';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,6 +18,8 @@ import DeliveryBanner from '../components/DeliveryBanner';
 import PromoBanner from '../components/PromoBanner';
 import HighProteinProductCard from '../components/HighProteinProductCard';
 import GridProductCard from '../components/GridProductCard';
+import { useProducts } from '../hooks/useProducts';
+import { ProductDisplayData } from '../types/product';
 
 const HomeScreen = () => {
   // ============================================
@@ -29,20 +32,12 @@ const HomeScreen = () => {
       // Initialize API - restores user token or falls back to API user
       const success = await initializeApi();
       setApiReady(success);
-
-      if (success) {
-        // Test: Fetch products (uncomment to test)
-        // try {
-        //   const products = await api.get('/products');
-        //   console.log('Products:', products.data);
-        // } catch (err) {
-        //   console.error('Failed to fetch products:', err);
-        // }
-      }
     };
-
     init();
   }, []);
+
+  // Fetch products after API is initialized
+  const { products, loading, error, highProteinProducts, dealsProducts, breakfastProducts } = useProducts(apiReady);
   // ============================================
 
   const categories = [
@@ -82,186 +77,70 @@ const HomeScreen = () => {
     emoji: '🥤',
   };
 
-  const orderAgainProducts = [
-    {
-      name: 'Kaju Katli Premium',
-      price: 450,
-      rating: 4.8,
-      daysAgo: 3,
-      image: require('../../paneer.jpg'),
-    },
-    {
-      name: 'Mysore Pak',
-      price: 380,
-      rating: 4.6,
-      daysAgo: 3,
-      image: require('../../paneer.jpg'),
-    },
-    {
-      name: 'Gulab Jamun Pack',
-      price: 252,
-      rating: 4.9,
-      daysAgo: 3,
-      image: require('../../paneer.jpg'),
-    },
-    {
-      name: 'Samosa Pack',
-      price: 220,
-      rating: 4.7,
-      daysAgo: 3,
-      image: require('../../paneer.jpg'),
-    },
-  ];
+  // Helper function to render product card based on product data
+  const renderProductCard = (product: ProductDisplayData) => (
+    <ProductCard
+      key={product.id}
+      name={product.name}
+      price={product.price}
+      rating={product.rating}
+      imageUri={product.imageUri}
+    />
+  );
 
-  const highProteinProducts = [
-    {
-      name: 'Kaju Katli Premium',
-      price: 450,
-      originalPrice: 500,
-      rating: 4.8,
-      protein: '8g',
-      calories: '320',
-      discount: '10% OFF',
-      image: require('../../paneer.jpg'),
-    },
-    {
-      name: 'Chakli Mix',
-      price: 180,
-      rating: 4.5,
-      protein: '10g',
-      calories: '450',
-      isOrganic: true,
-      image: require('../../paneer.jpg'),
-    },
-    {
-      name: 'Paneer Tikka',
-      price: 225,
-      originalPrice: 250,
-      rating: 4.7,
-      protein: '18g',
-      calories: '380',
-      discount: '10% OFF',
-      image: require('../../paneer.jpg'),
-    },
-  ];
+  const renderHighProteinCard = (product: ProductDisplayData) => (
+    <HighProteinProductCard
+      key={product.id}
+      name={product.name}
+      price={product.price}
+      originalPrice={product.originalPrice}
+      rating={product.rating}
+      protein={product.protein}
+      calories={product.calories}
+      discount={product.discount}
+      isOrganic={product.isOrganic}
+      imageUri={product.imageUri}
+    />
+  );
 
-  const trendingProducts = [
-    {
-      name: 'Kaju Katli Premium',
-      price: 450,
-      originalPrice: 500,
-      rating: 4.8,
-      protein: '8g',
-      calories: '320',
-      discount: '10% OFF',
-      image: require('../../paneer.jpg'),
-    },
-    {
-      name: 'Gulab Jamun Pack',
-      price: 252,
-      originalPrice: 280,
-      rating: 4.9,
-      protein: '4g',
-      calories: '180',
-      discount: '10% OFF',
-      image: require('../../paneer.jpg'),
-    },
-    {
-      name: 'Samosa Party Pack',
-      price: 220,
-      rating: 4.7,
-      protein: '3g',
-      calories: '150',
-      image: require('../../paneer.jpg'),
-    },
-  ];
+  const renderGridCard = (product: ProductDisplayData) => (
+    <GridProductCard
+      key={product.id}
+      name={product.name}
+      price={product.price}
+      originalPrice={product.originalPrice}
+      rating={product.rating}
+      reviewCount={product.reviewCount}
+      discount={product.discount}
+      isOrganic={product.isOrganic}
+      imageUri={product.imageUri}
+    />
+  );
 
-  const bestDealsProducts = [
-    {
-      name: 'Kaju Katli Premium',
-      price: 450,
-      originalPrice: 500,
-      rating: 4.8,
-      protein: '8g',
-      calories: '320',
-      discount: '10% OFF',
-      image: require('../../paneer.jpg'),
-    },
-    {
-      name: 'Gulab Jamun Pack',
-      price: 252,
-      originalPrice: 280,
-      rating: 4.9,
-      protein: '4g',
-      calories: '180',
-      discount: '10% OFF',
-      image: require('../../paneer.jpg'),
-    },
-    {
-      name: 'Paneer Tikka',
-      price: 225,
-      originalPrice: 250,
-      rating: 4.7,
-      protein: '18g',
-      calories: '380',
-      discount: '10% OFF',
-      image: require('../../paneer.jpg'),
-    },
-  ];
+  // Loading state
+  if (loading && products.length === 0) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FF6B35" />
+          <Text style={styles.loadingText}>Loading products...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
-  const exploreMenuProducts = [
-    {
-      name: 'Kaju Katli Premium',
-      price: 450,
-      originalPrice: 500,
-      rating: 4.8,
-      reviewCount: 234,
-      discount: '10% OFF',
-      isOrganic: true,
-      image: require('../../paneer.jpg'),
-    },
-    {
-      name: 'Mysore Pak',
-      price: 380,
-      rating: 4.6,
-      reviewCount: 189,
-      image: require('../../paneer.jpg'),
-    },
-    {
-      name: 'Gulab Jamun Pack',
-      price: 252,
-      originalPrice: 280,
-      rating: 4.9,
-      reviewCount: 456,
-      discount: '10% OFF',
-      isOrganic: true,
-      image: require('../../paneer.jpg'),
-    },
-    {
-      name: 'Samosa Party Pack',
-      price: 220,
-      rating: 4.7,
-      reviewCount: 342,
-      image: require('../../paneer.jpg'),
-    },
-    {
-      name: 'Chakli Mix',
-      price: 180,
-      rating: 4.5,
-      reviewCount: 156,
-      isOrganic: true,
-      image: require('../../paneer.jpg'),
-    },
-    {
-      name: 'Paneer Tikka',
-      price: 225,
-      originalPrice: 250,
-      rating: 4.7,
-      reviewCount: 278,
-      discount: '10% OFF',
-      image: require('../../paneer.jpg'),
-    },
-  ];
+  // Error state
+  if (error && products.length === 0) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorIcon}>⚠️</Text>
+          <Text style={styles.errorText}>Failed to load products</Text>
+          <Text style={styles.errorSubtext}>{error}</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -343,154 +222,154 @@ const HomeScreen = () => {
         {/* Promo Banner */}
         <PromoBanner />
 
-        {/* Order Again */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <View style={styles.sectionTitleContainer}>
-              <Text style={styles.orderAgainIcon}>🔄</Text>
-              <View>
-                <Text style={styles.sectionTitle}>Order Again</Text>
-                <Text style={styles.sectionSubtitle}>Your recent favorites</Text>
+        {/* Order Again - Shows breakfast products */}
+        {breakfastProducts.length > 0 ? (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionTitleContainer}>
+                <Text style={styles.orderAgainIcon}>🔄</Text>
+                <View>
+                  <Text style={styles.sectionTitle}>Order Again</Text>
+                  <Text style={styles.sectionSubtitle}>Your recent favorites</Text>
+                </View>
               </View>
+              <TouchableOpacity>
+                <Text style={styles.seeAllText}>See All</Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>See All</Text>
-            </TouchableOpacity>
-          </View>
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.productsContainer}
-          >
-            {orderAgainProducts.map((product, index) => (
-              <ProductCard key={index} {...product} />
-            ))}
-          </ScrollView>
-        </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.productsContainer}
+            >
+              {breakfastProducts.slice(0, 6).map(renderProductCard)}
+            </ScrollView>
+          </View>
+        ) : null}
 
         {/* High Protein Picks */}
-        <View style={styles.sectionWithBackground}>
-          <View>
-            <View style={styles.sectionHeader}>
-              <View style={styles.sectionTitleContainer}>
-                <Text style={styles.proteinIcon}>⚡</Text>
-                <View>
-                  <Text style={styles.sectionTitle}>High Protein Picks</Text>
-                  <Text style={styles.sectionSubtitle}>Fuel your fitness goals</Text>
+        {highProteinProducts.length > 0 ? (
+          <View style={styles.sectionWithBackground}>
+            <View>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionTitleContainer}>
+                  <Text style={styles.proteinIcon}>⚡</Text>
+                  <View>
+                    <Text style={styles.sectionTitle}>High Protein Picks</Text>
+                    <Text style={styles.sectionSubtitle}>Fuel your fitness goals</Text>
+                  </View>
                 </View>
               </View>
+
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.productsContainer}
+              >
+                {highProteinProducts.slice(0, 6).map(renderHighProteinCard)}
+              </ScrollView>
             </View>
-
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.productsContainer}
-            >
-              {highProteinProducts.map((product, index) => (
-                <HighProteinProductCard key={index} {...product} />
-              ))}
-            </ScrollView>
           </View>
-        </View>
+        ) : null}
 
-        {/* Trending This Week */}
-        <View style={styles.sectionWithBackground}>
-          <View>
-            <View style={styles.sectionHeader}>
-              <View style={styles.sectionTitleContainer}>
-                <Text style={styles.trendingIcon}>📈</Text>
-                <View>
-                  <Text style={styles.sectionTitle}>Trending This Week</Text>
-                  <Text style={styles.sectionSubtitle}>Most popular items</Text>
+        {/* Trending This Week - Shows all products */}
+        {products.length > 0 ? (
+          <View style={styles.sectionWithBackground}>
+            <View>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionTitleContainer}>
+                  <Text style={styles.trendingIcon}>📈</Text>
+                  <View>
+                    <Text style={styles.sectionTitle}>Trending This Week</Text>
+                    <Text style={styles.sectionSubtitle}>Most popular items</Text>
+                  </View>
                 </View>
               </View>
-            </View>
 
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.productsContainer}
-            >
-              {trendingProducts.map((product, index) => (
-                <HighProteinProductCard key={index} {...product} />
-              ))}
-            </ScrollView>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.productsContainer}
+              >
+                {products.slice(0, 6).map(renderHighProteinCard)}
+              </ScrollView>
+            </View>
           </View>
-        </View>
+        ) : null}
 
         {/* Best Deals */}
-        <View style={styles.sectionWithBackground}>
-          <View>
-            <View style={styles.sectionHeader}>
-              <View style={styles.sectionTitleContainer}>
-                <Text style={styles.dealsIcon}>💰</Text>
-                <View>
-                  <Text style={styles.sectionTitle}>Best Deals</Text>
-                  <Text style={styles.sectionSubtitle}>Save more on these items</Text>
+        {dealsProducts.length > 0 ? (
+          <View style={styles.sectionWithBackground}>
+            <View>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionTitleContainer}>
+                  <Text style={styles.dealsIcon}>💰</Text>
+                  <View>
+                    <Text style={styles.sectionTitle}>Best Deals</Text>
+                    <Text style={styles.sectionSubtitle}>Save more on these items</Text>
+                  </View>
                 </View>
               </View>
+
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.productsContainer}
+              >
+                {dealsProducts.slice(0, 6).map(renderHighProteinCard)}
+              </ScrollView>
             </View>
-
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.productsContainer}
-            >
-              {bestDealsProducts.map((product, index) => (
-                <HighProteinProductCard key={index} {...product} />
-              ))}
-            </ScrollView>
           </View>
-        </View>
+        ) : null}
 
-        {/* Organic & Healthy */}
-        <View style={styles.sectionWithBackground}>
-          <View>
-            <View style={styles.sectionHeader}>
-              <View style={styles.sectionTitleContainer}>
-                <Text style={styles.organicIcon}>🌿</Text>
-                <View>
-                  <Text style={styles.sectionTitle}>Organic & Healthy</Text>
-                  <Text style={styles.sectionSubtitle}>Farm fresh goodness</Text>
+        {/* Organic & Healthy - Shows organic products */}
+        {products.filter(p => p.isOrganic).length > 0 ? (
+          <View style={styles.sectionWithBackground}>
+            <View>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionTitleContainer}>
+                  <Text style={styles.organicIcon}>🌿</Text>
+                  <View>
+                    <Text style={styles.sectionTitle}>Organic & Healthy</Text>
+                    <Text style={styles.sectionSubtitle}>Farm fresh goodness</Text>
+                  </View>
                 </View>
               </View>
+
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.productsContainer}
+              >
+                {products.filter(p => p.isOrganic).slice(0, 6).map(renderHighProteinCard)}
+              </ScrollView>
             </View>
-
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.productsContainer}
-            >
-              {highProteinProducts.map((product, index) => (
-                <HighProteinProductCard key={index} {...product} />
-              ))}
-            </ScrollView>
           </View>
-        </View>
+        ) : null}
 
-        {/* Explore the Menu */}
-        <View style={styles.section}>
-          <View style={styles.exploreHeader}>
-            <View style={styles.exploreHeaderLeft}>
-              <Text style={styles.menuIcon}>🍽️</Text>
-              <View>
-                <Text style={styles.sectionTitle}>Explore the Menu</Text>
-                <Text style={styles.sectionSubtitle}>{exploreMenuProducts.length} items available</Text>
+        {/* Explore the Menu - Shows all products in grid */}
+        {products.length > 0 ? (
+          <View style={styles.section}>
+            <View style={styles.exploreHeader}>
+              <View style={styles.exploreHeaderLeft}>
+                <Text style={styles.menuIcon}>🍽️</Text>
+                <View>
+                  <Text style={styles.sectionTitle}>Explore the Menu</Text>
+                  <Text style={styles.sectionSubtitle}>{products.length} items available</Text>
+                </View>
               </View>
+              <TouchableOpacity style={styles.filterButton}>
+                <Text style={styles.filterIcon}>☰</Text>
+                <Text style={styles.filterText}>Filter</Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity style={styles.filterButton}>
-              <Text style={styles.filterIcon}>☰</Text>
-              <Text style={styles.filterText}>Filter</Text>
-            </TouchableOpacity>
-          </View>
 
-          <View style={styles.gridContainer}>
-            {exploreMenuProducts.map((product, index) => (
-              <GridProductCard key={index} {...product} />
-            ))}
+            <View style={styles.gridContainer}>
+              {products.map(renderGridCard)}
+            </View>
           </View>
-        </View>
+        ) : null}
 
       </ScrollView>
     </SafeAreaView>
@@ -501,6 +380,37 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#666',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorIcon: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
+  errorText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    marginBottom: 8,
+  },
+  errorSubtext: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
   },
   header: {
     flexDirection: 'row',

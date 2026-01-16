@@ -6,11 +6,12 @@ interface HighProteinProductCardProps {
   price: number;
   originalPrice?: number;
   rating: number;
-  protein: string;
-  calories: string;
+  protein?: string | null;
+  calories?: string | null;
   discount?: string;
   isOrganic?: boolean;
   image?: ImageSourcePropType;
+  imageUri?: string | null; // Support for remote images
 }
 
 const HighProteinProductCard: React.FC<HighProteinProductCardProps> = ({
@@ -23,24 +24,28 @@ const HighProteinProductCard: React.FC<HighProteinProductCardProps> = ({
   discount,
   isOrganic,
   image,
+  imageUri,
 }) => {
+  // Determine the image source
+  const imageSource = imageUri ? { uri: imageUri } : image;
+
   return (
     <TouchableOpacity style={styles.card}>
       <View style={styles.imageContainer}>
-        {image && (
-          <Image source={image} style={styles.productImage} resizeMode="cover" />
-        )}
-        {discount && (
+        {imageSource ? (
+          <Image source={imageSource} style={styles.productImage} resizeMode="cover" />
+        ) : null}
+        {discount ? (
           <View style={styles.discountBadge}>
             <Text style={styles.discountText}>{discount}</Text>
           </View>
-        )}
-        {isOrganic && (
+        ) : null}
+        {isOrganic ? (
           <View style={styles.organicBadge}>
             <Text style={styles.organicIcon}>✓</Text>
             <Text style={styles.organicText}>Organic</Text>
           </View>
-        )}
+        ) : null}
         <View style={styles.ratingBadge}>
           <Text style={styles.star}>⭐</Text>
           <Text style={styles.ratingText}>{rating}</Text>
@@ -50,15 +55,17 @@ const HighProteinProductCard: React.FC<HighProteinProductCardProps> = ({
         <Text style={styles.name} numberOfLines={2}>
           {name}
         </Text>
-        <Text style={styles.nutritionInfo}>
-          {protein} protein • {calories} cal
-        </Text>
+        {(protein || calories) ? (
+          <Text style={styles.nutritionInfo}>
+            {protein ? `${protein} protein` : ''}{(protein && calories) ? ' • ' : ''}{calories ? `${calories} cal` : ''}
+          </Text>
+        ) : null}
         <View style={styles.priceRow}>
           <View style={styles.priceContainer}>
             <Text style={styles.price}>₹{price}</Text>
-            {originalPrice && (
+            {originalPrice ? (
               <Text style={styles.originalPrice}>₹{originalPrice}</Text>
-            )}
+            ) : null}
           </View>
           <TouchableOpacity style={styles.addButton}>
             <Text style={styles.addButtonText}>Add</Text>

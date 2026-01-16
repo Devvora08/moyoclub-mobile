@@ -5,25 +5,30 @@ interface ProductCardProps {
   name: string;
   price: number;
   rating: number;
-  daysAgo: number;
+  daysAgo?: number;
   imageColor?: string;
   image?: ImageSourcePropType;
+  imageUri?: string | null; // Support for remote images
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
   name,
   price,
   rating,
-  daysAgo,
+  daysAgo = 0,
   imageColor,
   image,
+  imageUri,
 }) => {
+  // Determine the image source
+  const imageSource = imageUri ? { uri: imageUri } : image;
+
   return (
     <TouchableOpacity style={styles.card}>
-      <View style={[styles.imageContainer, !image && { backgroundColor: imageColor }]}>
-        {image && (
-          <Image source={image} style={styles.productImage} resizeMode="cover" />
-        )}
+      <View style={[styles.imageContainer, !imageSource ? { backgroundColor: imageColor || '#f5f5f5' } : null]}>
+        {imageSource ? (
+          <Image source={imageSource} style={styles.productImage} resizeMode="cover" />
+        ) : null}
         <View style={styles.ratingBadge}>
           <Text style={styles.star}>⭐</Text>
           <Text style={styles.ratingText}>{rating}</Text>
