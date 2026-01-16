@@ -1,7 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ImageSourcePropType } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ImageSourcePropType, Alert } from 'react-native';
+import { useCart } from '../hooks/useCart';
+import { useNavigation } from '@react-navigation/native';
 
 interface HighProteinProductCardProps {
+  id: number;
   name: string;
   price: number;
   originalPrice?: number;
@@ -11,10 +14,11 @@ interface HighProteinProductCardProps {
   discount?: string;
   isOrganic?: boolean;
   image?: ImageSourcePropType;
-  imageUri?: string | null; // Support for remote images
+  imageUri?: string | null;
 }
 
 const HighProteinProductCard: React.FC<HighProteinProductCardProps> = ({
+  id,
   name,
   price,
   originalPrice,
@@ -26,8 +30,44 @@ const HighProteinProductCard: React.FC<HighProteinProductCardProps> = ({
   image,
   imageUri,
 }) => {
-  // Determine the image source
+  const { addToCart, getItemQuantity } = useCart();
+  const navigation = useNavigation();
+
   const imageSource = imageUri ? { uri: imageUri } : image;
+  const quantityInCart = getItemQuantity(id);
+
+  const handleAddToCart = async () => {
+    const result = await addToCart({
+      productId: id,
+      name,
+      price,
+      originalPrice,
+      imageUri: imageUri || null,
+      quantity: 1,
+    });
+
+    if (result.requiresAuth) {
+      Alert.alert(
+        'Login Required',
+        'Please login to add items to your cart.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Login',
+            onPress: () => {
+              // Navigate to Account tab for login
+              (navigation as any).navigate('Account');
+            },
+          },
+        ]
+      );
+    } else if (result.success) {
+      // Optional: Show a brief success feedback
+      // Could use a toast notification here
+    } else {
+      Alert.alert('Error', result.message);
+    }
+  };
 
   return (
     <TouchableOpacity style={styles.card}>
@@ -67,8 +107,13 @@ const HighProteinProductCard: React.FC<HighProteinProductCardProps> = ({
               <Text style={styles.originalPrice}>₹{originalPrice}</Text>
             ) : null}
           </View>
-          <TouchableOpacity style={styles.addButton}>
-            <Text style={styles.addButtonText}>Add</Text>
+          <TouchableOpacity
+            style={[styles.addButton, quantityInCart > 0 && styles.addButtonActive]}
+            onPress={handleAddToCart}
+          >
+            <Text style={[styles.addButtonText, quantityInCart > 0 && styles.addButtonTextActive]}>
+              {quantityInCart > 0 ? `${quantityInCart}` : 'Add'}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -197,11 +242,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 6,
     borderRadius: 16,
+    minWidth: 50,
+    alignItems: 'center',
+  },
+  addButtonActive: {
+    backgroundColor: '#4CAF50',
   },
   addButtonText: {
     color: '#fff',
     fontSize: 13,
     fontWeight: '700',
+  },
+  addButtonTextActive: {
+    color: '#fff',
   },
 });
 

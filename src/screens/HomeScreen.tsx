@@ -91,6 +91,7 @@ const HomeScreen = () => {
   const renderHighProteinCard = (product: ProductDisplayData) => (
     <HighProteinProductCard
       key={product.id}
+      id={product.id}
       name={product.name}
       price={product.price}
       originalPrice={product.originalPrice}
@@ -106,6 +107,7 @@ const HomeScreen = () => {
   const renderGridCard = (product: ProductDisplayData) => (
     <GridProductCard
       key={product.id}
+      id={product.id}
       name={product.name}
       price={product.price}
       originalPrice={product.originalPrice}

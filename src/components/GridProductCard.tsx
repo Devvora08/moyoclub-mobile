@@ -1,7 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ImageSourcePropType } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ImageSourcePropType, Alert } from 'react-native';
+import { useCart } from '../hooks/useCart';
+import { useNavigation } from '@react-navigation/native';
 
 interface GridProductCardProps {
+  id: number;
   name: string;
   price: number;
   originalPrice?: number;
@@ -10,10 +13,11 @@ interface GridProductCardProps {
   discount?: string;
   isOrganic?: boolean;
   image?: ImageSourcePropType;
-  imageUri?: string | null; // Support for remote images
+  imageUri?: string | null;
 }
 
 const GridProductCard: React.FC<GridProductCardProps> = ({
+  id,
   name,
   price,
   originalPrice,
@@ -24,8 +28,40 @@ const GridProductCard: React.FC<GridProductCardProps> = ({
   image,
   imageUri,
 }) => {
-  // Determine the image source
+  const { addToCart, getItemQuantity } = useCart();
+  const navigation = useNavigation();
+
   const imageSource = imageUri ? { uri: imageUri } : image;
+  const quantityInCart = getItemQuantity(id);
+
+  const handleAddToCart = async () => {
+    const result = await addToCart({
+      productId: id,
+      name,
+      price,
+      originalPrice,
+      imageUri: imageUri || null,
+      quantity: 1,
+    });
+
+    if (result.requiresAuth) {
+      Alert.alert(
+        'Login Required',
+        'Please login to add items to your cart.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Login',
+            onPress: () => {
+              (navigation as any).navigate('Account');
+            },
+          },
+        ]
+      );
+    } else if (!result.success) {
+      Alert.alert('Error', result.message);
+    }
+  };
 
   return (
     <TouchableOpacity style={styles.card}>
@@ -47,8 +83,13 @@ const GridProductCard: React.FC<GridProductCardProps> = ({
         <TouchableOpacity style={styles.favoriteButton}>
           <Text style={styles.heartIcon}>♡</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.addButtonFloat}>
-          <Text style={styles.addButtonFloatText}>+</Text>
+        <TouchableOpacity
+          style={[styles.addButtonFloat, quantityInCart > 0 && styles.addButtonFloatActive]}
+          onPress={handleAddToCart}
+        >
+          <Text style={styles.addButtonFloatText}>
+            {quantityInCart > 0 ? quantityInCart : '+'}
+          </Text>
         </TouchableOpacity>
       </View>
       <View style={styles.info}>
@@ -158,11 +199,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  addButtonFloatActive: {
+    backgroundColor: '#4CAF50',
+  },
   addButtonFloatText: {
     color: '#fff',
-    fontSize: 24,
-    fontWeight: '400',
-    lineHeight: 28,
+    fontSize: 20,
+    fontWeight: '600',
+    lineHeight: 24,
   },
   info: {
     padding: 12,

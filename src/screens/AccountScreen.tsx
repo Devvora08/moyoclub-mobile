@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -13,17 +13,16 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { login, signup, logout } from '../api/auth';
-import { User, LoginResponse } from '../types/auth';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../context/AuthContext';
+import { useCart } from '../hooks/useCart';
 
 type AuthMode = 'login' | 'signup';
 
 const AccountScreen = () => {
+  const { user, isAuthenticated, isLoading, isCheckingAuth, login, signup, logout } = useAuth();
+  const { totalItems } = useCart();
+
   const [authMode, setAuthMode] = useState<AuthMode>('login');
-  const [isLoading, setIsLoading] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState('');
@@ -46,66 +45,19 @@ const AccountScreen = () => {
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Check for existing session on mount
-  useEffect(() => {
-    checkExistingSession();
-  }, []);
-
-  const checkExistingSession = async () => {
-    try {
-      const userData = await AsyncStorage.getItem('user');
-      if (userData) {
-        setUser(JSON.parse(userData));
-      }
-    } catch (error) {
-      console.error('Error checking session:', error);
-    } finally {
-      setIsCheckingAuth(false);
-    }
-  };
-
-  const saveUserSession = async (userData: User, token: string) => {
-    try {
-      await AsyncStorage.setItem('user', JSON.stringify(userData));
-      await AsyncStorage.setItem('token', token);
-    } catch (error) {
-      console.error('Error saving session:', error);
-    }
-  };
-
-  const clearUserSession = async () => {
-    try {
-      await AsyncStorage.removeItem('user');
-      await AsyncStorage.removeItem('token');
-    } catch (error) {
-      console.error('Error clearing session:', error);
-    }
-  };
-
   const handleLogin = async () => {
     if (!loginEmail.trim() || !loginPassword.trim()) {
       Alert.alert('Error', 'Please enter both email and password');
       return;
     }
 
-    setIsLoading(true);
-    try {
-      const response: LoginResponse = await login({
-        email: loginEmail.trim(),
-        password: loginPassword,
-      });
-
-      await saveUserSession(response.user, response.access_token);
-      setUser(response.user);
+    const result = await login(loginEmail, loginPassword);
+    if (result.success) {
       setLoginEmail('');
       setLoginPassword('');
-      Alert.alert('Success', `Welcome back, ${response.user.first_name}!`);
-    } catch (error: any) {
-      console.error('Login error:', error);
-      const message = error.response?.data?.message || 'Login failed. Please check your credentials.';
-      Alert.alert('Login Failed', message);
-    } finally {
-      setIsLoading(false);
+      Alert.alert('Success', result.message);
+    } else {
+      Alert.alert('Login Failed', result.message);
     }
   };
 
@@ -137,85 +89,57 @@ const AccountScreen = () => {
       return;
     }
 
-    setIsLoading(true);
-    try {
-      const response = await signup({
-        role_id: 3, // Customer role
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
-        email: signupEmail.trim(),
-        password: signupPassword,
-        status: 'active',
-        phone: phone.trim(),
-        address1: address1.trim(),
-        address2: address2.trim() || undefined,
-        city: city.trim(),
-        state: state.trim(),
-        country: country.trim(),
-        postal_code: postalCode.trim(),
-      });
+    const result = await signup({
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: signupEmail.trim(),
+      password: signupPassword,
+      phone: phone.trim(),
+      address1: address1.trim(),
+      address2: address2.trim() || undefined,
+      city: city.trim(),
+      state: state.trim(),
+      country: country.trim(),
+      postalCode: postalCode.trim(),
+    });
 
-      if (response.success) {
-        Alert.alert(
-          'Account Created!',
-          'Your account has been created successfully. Please login.',
-          [
-            {
-              text: 'Login Now',
-              onPress: () => {
-                setAuthMode('login');
-                setLoginEmail(signupEmail);
-                // Clear signup form
-                setFirstName('');
-                setLastName('');
-                setSignupEmail('');
-                setSignupPassword('');
-                setConfirmPassword('');
-                setPhone('');
-                setAddress1('');
-                setAddress2('');
-                setCity('');
-                setState('');
-                setCountry('India');
-                setPostalCode('');
-              },
-            },
-          ]
-        );
-      }
-    } catch (error: any) {
-      console.error('Signup error:', error);
-      const message = error.response?.data?.message || 'Signup failed. Please try again.';
-      Alert.alert('Signup Failed', message);
-    } finally {
-      setIsLoading(false);
+    if (result.success) {
+      Alert.alert('Account Created!', result.message, [
+        {
+          text: 'Login Now',
+          onPress: () => {
+            setAuthMode('login');
+            setLoginEmail(signupEmail);
+            // Clear signup form
+            setFirstName('');
+            setLastName('');
+            setSignupEmail('');
+            setSignupPassword('');
+            setConfirmPassword('');
+            setPhone('');
+            setAddress1('');
+            setAddress2('');
+            setCity('');
+            setState('');
+            setCountry('India');
+            setPostalCode('');
+          },
+        },
+      ]);
+    } else {
+      Alert.alert('Signup Failed', result.message);
     }
   };
 
-  const handleLogout = async () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            setIsLoading(true);
-            try {
-              await logout();
-              await clearUserSession();
-              setUser(null);
-            } catch (error) {
-              console.error('Logout error:', error);
-            } finally {
-              setIsLoading(false);
-            }
-          },
-        },
-      ]
-    );
+  const handleLogout = () => {
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: logout,
+      },
+    ]);
   };
 
   // Loading state while checking auth
@@ -230,13 +154,18 @@ const AccountScreen = () => {
   }
 
   // Logged in view
-  if (user) {
+  if (isAuthenticated && user) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Account</Text>
           <TouchableOpacity style={styles.cartIconContainer}>
             <Ionicons name="cart-outline" size={24} color="#333" />
+            {totalItems > 0 && (
+              <View style={styles.cartBadge}>
+                <Text style={styles.cartBadgeText}>{totalItems > 99 ? '99+' : totalItems}</Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -245,10 +174,13 @@ const AccountScreen = () => {
           <View style={styles.profileHeader}>
             <View style={styles.avatarContainer}>
               <Text style={styles.avatarText}>
-                {user.first_name?.charAt(0)}{user.last_name?.charAt(0)}
+                {user.first_name?.charAt(0)}
+                {user.last_name?.charAt(0)}
               </Text>
             </View>
-            <Text style={styles.userName}>{user.first_name} {user.last_name}</Text>
+            <Text style={styles.userName}>
+              {user.first_name} {user.last_name}
+            </Text>
             <Text style={styles.userEmail}>{user.email}</Text>
             <View style={styles.roleBadge}>
               <Text style={styles.roleText}>{user.role?.name || 'Customer'}</Text>
@@ -321,6 +253,11 @@ const AccountScreen = () => {
         <Text style={styles.headerTitle}>Account</Text>
         <TouchableOpacity style={styles.cartIconContainer}>
           <Ionicons name="cart-outline" size={24} color="#333" />
+          {totalItems > 0 && (
+            <View style={styles.cartBadge}>
+              <Text style={styles.cartBadgeText}>{totalItems > 99 ? '99+' : totalItems}</Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -374,7 +311,12 @@ const AccountScreen = () => {
               </View>
 
               <View style={styles.inputContainer}>
-                <Ionicons name="lock-closed-outline" size={20} color="#999" style={styles.inputIcon} />
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color="#999"
+                  style={styles.inputIcon}
+                />
                 <TextInput
                   style={styles.input}
                   placeholder="Password"
@@ -431,7 +373,12 @@ const AccountScreen = () => {
 
               <View style={styles.nameRow}>
                 <View style={[styles.inputContainer, styles.halfInput]}>
-                  <Ionicons name="person-outline" size={20} color="#999" style={styles.inputIcon} />
+                  <Ionicons
+                    name="person-outline"
+                    size={20}
+                    color="#999"
+                    style={styles.inputIcon}
+                  />
                   <TextInput
                     style={styles.input}
                     placeholder="First Name *"
@@ -508,7 +455,12 @@ const AccountScreen = () => {
 
               <View style={styles.nameRow}>
                 <View style={[styles.inputContainer, styles.halfInput]}>
-                  <Ionicons name="location-outline" size={20} color="#999" style={styles.inputIcon} />
+                  <Ionicons
+                    name="location-outline"
+                    size={20}
+                    color="#999"
+                    style={styles.inputIcon}
+                  />
                   <TextInput
                     style={styles.input}
                     placeholder="City *"
@@ -558,7 +510,12 @@ const AccountScreen = () => {
               <Text style={styles.sectionLabel}>Password</Text>
 
               <View style={styles.inputContainer}>
-                <Ionicons name="lock-closed-outline" size={20} color="#999" style={styles.inputIcon} />
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color="#999"
+                  style={styles.inputIcon}
+                />
                 <TextInput
                   style={styles.input}
                   placeholder="Password *"
@@ -578,7 +535,12 @@ const AccountScreen = () => {
               </View>
 
               <View style={styles.inputContainer}>
-                <Ionicons name="lock-closed-outline" size={20} color="#999" style={styles.inputIcon} />
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color="#999"
+                  style={styles.inputIcon}
+                />
                 <TextInput
                   style={styles.input}
                   placeholder="Confirm Password *"
@@ -648,6 +610,24 @@ const styles = StyleSheet.create({
   },
   cartIconContainer: {
     padding: 4,
+    position: 'relative',
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    backgroundColor: '#FF6B35',
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  cartBadgeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '700',
   },
   keyboardView: {
     flex: 1,
