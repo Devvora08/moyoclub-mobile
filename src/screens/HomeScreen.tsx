@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import api, { initializeApi } from '../api/config';
 import {
   View,
   Text,
@@ -18,6 +19,32 @@ import HighProteinProductCard from '../components/HighProteinProductCard';
 import GridProductCard from '../components/GridProductCard';
 
 const HomeScreen = () => {
+  // ============================================
+  // API Initialization - Get read-only token for browsing
+  // ============================================
+  const [apiReady, setApiReady] = useState(false);
+
+  useEffect(() => {
+    const init = async () => {
+      // Initialize API - restores user token or falls back to API user
+      const success = await initializeApi();
+      setApiReady(success);
+
+      if (success) {
+        // Test: Fetch products (uncomment to test)
+        // try {
+        //   const products = await api.get('/products');
+        //   console.log('Products:', products.data);
+        // } catch (err) {
+        //   console.error('Failed to fetch products:', err);
+        // }
+      }
+    };
+
+    init();
+  }, []);
+  // ============================================
+
   const categories = [
     {
       title: 'Ready to Eat',

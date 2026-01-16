@@ -1,0 +1,1193 @@
+{
+	"info": {
+		"_postman_id": "d7766242-bdb9-4871-98f6-48afe53aba46",
+		"name": "MoyoClub-API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "1529216"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();\r",
+									"\r",
+									"// Save JWT token\r",
+									"if (res.access_token) {\r",
+									"    pm.environment.set(\"token\", res.access_token);\r",
+									"}\r",
+									"\r",
+									"// Save useful user data\r",
+									"if (res.user) {\r",
+									"    pm.environment.set(\"user_id\", res.user.id);\r",
+									"    pm.environment.set(\"user_email\", res.user.email);\r",
+									"    pm.environment.set(\"user_role_id\", res.user.role_id);\r",
+									"}\r",
+									"\r",
+									"console.log(\"Auth data saved to environment\");\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"test2@example.com\",\r\n  \"password\": \"password123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/login"
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "noauth"
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Info",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"test2@example.com\",\r\n  \"password\": \"password123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/users/1"
+					},
+					"response": []
+				},
+				{
+					"name": "list-filter",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users?status=active&page=1&per_page=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "active"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "per_page",
+									"value": "50"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"role_id\": 3,\r\n  \"first_name\": \"David\",\r\n  \"last_name\": \"Job\",\r\n  \"email\": \"david.job@yahoo.com\",\r\n  \"password\": \"password123\",\r\n  \"status\": \"active\",\r\n  \"phone\": \"+91-989898222\",\r\n  \"address1\": \"Anandtara Society\",\r\n  \"address2\": \"Keshavnagar\",\r\n  \"city\": \"Pune\",\r\n  \"state\": \"Maharashtra\",\r\n  \"country\": \"India\",\r\n  \"postal_code\": \"412345\"\r\n}"
+						},
+						"url": "{{base_url}}/users"
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"first_name\": \"Tejas\",\r\n  \"last_name\": \"Paramar\",\r\n  \"phone\": \"+91-7777123\",\r\n  \"city\": \"Pune\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/users/5"
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{base_url}}/users/4"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Roles",
+			"item": [
+				{
+					"name": "list",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"product_name\": \"Special Veg Palak Paneer\",\r\n  \"price\": 450,\r\n  \"product_code\": \"SVPP13301\"\r\n}"
+						},
+						"url": "{{base_url}}/roles"
+					},
+					"response": []
+				},
+				{
+					"name": "info",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"product_name\": \"Special Veg Palak Paneer\",\r\n  \"price\": 450,\r\n  \"product_code\": \"SVPP13301\"\r\n}"
+						},
+						"url": "{{base_url}}/roles/2"
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Site Admin\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/roles/2"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "add",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "product_name",
+									"value": "Veg Palak Paneer",
+									"type": "text"
+								},
+								{
+									"key": "product_code",
+									"value": "VPP1233",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "350",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Vegetable Palan and Paneer Gravy Sabjee",
+									"type": "text"
+								},
+								{
+									"key": "badges",
+									"value": "Very Popular Dish",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "veg",
+									"type": "text"
+								},
+								{
+									"key": "status",
+									"value": "active",
+									"type": "text"
+								},
+								{
+									"key": "is_addon",
+									"value": "0",
+									"type": "text"
+								},
+								{
+									"key": "is_campaign",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "meal_type",
+									"value": "[\"lunch\",\"dinner\"]",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/P:/tmp/food-image/EatingWell-White-Bean-and-Veggie-Salad-1x1-3ba5bb396fb742469a2f0c65ae79f75a.jpg"
+								}
+							]
+						},
+						"url": "{{base_url}}/products"
+					},
+					"response": []
+				},
+				{
+					"name": "list",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "list-filter",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "product_name",
+									"value": "Veg Palak Paneer",
+									"type": "text"
+								},
+								{
+									"key": "product_code",
+									"value": "VPP1233",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "350",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Vegetable Palan and Paneer Gravy Sabjee",
+									"type": "text"
+								},
+								{
+									"key": "badges",
+									"value": "Very Popular Dish",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "veg",
+									"type": "text"
+								},
+								{
+									"key": "status",
+									"value": "active",
+									"type": "text"
+								},
+								{
+									"key": "is_addon",
+									"value": "0",
+									"type": "text"
+								},
+								{
+									"key": "is_campaign",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "meal_type",
+									"value": "[\"lunch\",\"dinner\"]",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/P:/tmp/food-image/EatingWell-White-Bean-and-Veggie-Salad-1x1-3ba5bb396fb742469a2f0c65ae79f75a.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/products?product_name=palak&type=veg&page=1&per_page=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products"
+							],
+							"query": [
+								{
+									"key": "product_name",
+									"value": "palak"
+								},
+								{
+									"key": "type",
+									"value": "veg"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "per_page",
+									"value": "50"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "info",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "product_name",
+									"value": "Veg Palak Paneer",
+									"type": "text"
+								},
+								{
+									"key": "product_code",
+									"value": "VPP1233",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "350",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Vegetable Palan and Paneer Gravy Sabjee",
+									"type": "text"
+								},
+								{
+									"key": "badges",
+									"value": "Very Popular Dish",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "veg",
+									"type": "text"
+								},
+								{
+									"key": "status",
+									"value": "active",
+									"type": "text"
+								},
+								{
+									"key": "is_addon",
+									"value": "0",
+									"type": "text"
+								},
+								{
+									"key": "is_campaign",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "meal_type",
+									"value": "[\"lunch\",\"dinner\"]",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/P:/tmp/food-image/EatingWell-White-Bean-and-Veggie-Salad-1x1-3ba5bb396fb742469a2f0c65ae79f75a.jpg"
+								}
+							]
+						},
+						"url": "{{base_url}}/products/13"
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"product_name\": \"Special Veg Palak Paneer\",\r\n  \"price\": 450,\r\n  \"product_code\": \"SVPP13301\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/products/13"
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"product_name\": \"Special Veg Palak Paneer\",\r\n  \"price\": 450,\r\n  \"product_code\": \"SVPP13301\"\r\n}"
+						},
+						"url": "{{base_url}}/products/12"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Campaigns",
+			"item": [
+				{
+					"name": "add",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"campaign_code\": \"CC1234\",\r\n  \"campaign_name\": \"First Temp Campign\",\r\n  \"campaign_source\": \"Marketing\",\r\n  \"venue\": \"Season Mall, Pune\",\r\n  \"tv_channel\": \"Sun TV\",\r\n  \"promo_price\": 100000,\r\n  \"status\": \"active\",\r\n  \"start_date\": \"25-12-2025\",\r\n  \"end_date\": \"27-12-2025\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/campaigns"
+					},
+					"response": []
+				},
+				{
+					"name": "list",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"campaign_code\": \"CC1234\",\r\n  \"campaign_name\": \"First Temp Campign\",\r\n  \"campaign_source\": \"Marketing\",\r\n  \"venue\": \"Season Mall, Pune\",\r\n  \"tv_channel\": \"Sun TV\",\r\n  \"promo_price\": 100000,\r\n  \"status\": \"active\",\r\n  \"start_date\": \"25-12-2025\",\r\n  \"end_date\": \"27-12-2025\"\r\n}\r\n"
+						},
+						"url": "{{base_url}}/campaigns"
+					},
+					"response": []
+				},
+				{
+					"name": "info",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"campaign_code\": \"CC1234\",\r\n  \"campaign_name\": \"First Temp Campign\",\r\n  \"campaign_source\": \"Marketing\",\r\n  \"venue\": \"Season Mall, Pune\",\r\n  \"tv_channel\": \"Sun TV\",\r\n  \"promo_price\": 100000,\r\n  \"status\": \"active\",\r\n  \"start_date\": \"25-12-2025\",\r\n  \"end_date\": \"27-12-2025\"\r\n}\r\n"
+						},
+						"url": "{{base_url}}/campaigns/2"
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"campaign_name\": \"First Temp Campaign Title\",\r\n  \"campaign_code\": \"CC-100\",\r\n  \"venue\": \"Rajkot, India\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/campaigns/1"
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"campaign_name\": \"First Temp Campaign Title\",\r\n  \"campaign_code\": \"CC-100\",\r\n  \"venue\": \"Rajkot, India\"\r\n}"
+						},
+						"url": "{{base_url}}/campaigns/1"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Campaign-Products-Mapping",
+			"item": [
+				{
+					"name": "add",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"campaign_id\": 3,\r\n    \"product_ids\":[10,13]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/campaign-products"
+					},
+					"response": []
+				},
+				{
+					"name": "batch-delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"product_ids\": [12,13]  \r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/campaigns/1/products/batch"
+					},
+					"response": []
+				},
+				{
+					"name": "campaign-delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/campaigns/1/products"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Product-Addons-Mapping",
+			"item": [
+				{
+					"name": "add",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"product_id\": 1,\r\n    \"addon_product_ids\": [1,2,3]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/product-addon-mappings"
+					},
+					"response": []
+				},
+				{
+					"name": "batch-delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"addon_product_ids\":[1,2,3]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/products/1/addons/batch"
+					},
+					"response": []
+				},
+				{
+					"name": "product-delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{base_url}}/products/1/addons"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "OTP-Login",
+			"item": [
+				{
+					"name": "email-otp",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"test2@example.com\"\r\n}"
+						},
+						"url": "{{base_url}}/otp/login/email"
+					},
+					"response": []
+				},
+				{
+					"name": "email-otp-verify",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"test2@example.com\",\r\n  \"otp\":\"718139\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/otp/verify/email"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Facilities",
+			"item": [
+				{
+					"name": "add",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"facility_name\":\"testing1\",\r\n    \"facility_type\":\"warehouse\",\r\n    \"address\":\"Testing address 123\",\r\n    \"city\":\"Pune\",\r\n    \"state\":\"Maharashtra\",\r\n    \"pincode\":\"412307\",\r\n    \"user_id\": 3\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/facilities"
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"facility_name\":\"testing123\",    \r\n    \"address\":\"Testing address 1234\"    \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/facilities/1"
+					},
+					"response": []
+				},
+				{
+					"name": "list",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/facilities"
+					},
+					"response": []
+				},
+				{
+					"name": "info",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/facilities/1"
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/facilities/1"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Product-Distribution",
+			"item": [
+				{
+					"name": "add",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id_product\":9,\r\n    \"id_facility\":2,\r\n    \"batch_number\":\"BB123-11-110\",\r\n    \"stock_qty\":1000,\r\n    \"total_stock\":1000,\r\n    \"arrival_date\":\"2026-01-10 09:10:10\",\r\n    \"expiry_date\":\"2026-02-10 09:10:10\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/inventory"
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{    \r\n    \"stock_qty\":950,\r\n    \"total_stock\":850    \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/inventory/1"
+					},
+					"response": []
+				},
+				{
+					"name": "list",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/inventory"
+					},
+					"response": []
+				},
+				{
+					"name": "info",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/inventory/1"
+					},
+					"response": []
+				},
+				{
+					"name": "availability",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/inventory/availability"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Assets",
+			"item": [
+				{
+					"name": "add",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "main_category",
+									"value": "media",
+									"type": "text"
+								},
+								{
+									"key": "category",
+									"value": "products",
+									"type": "text"
+								},
+								{
+									"key": "files[]",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "files[]",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "files[]",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": "{{base_url}}/assets"
+					},
+					"response": []
+				},
+				{
+					"name": "list",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "info",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "main_category",
+									"value": "media",
+									"type": "text"
+								},
+								{
+									"key": "category",
+									"value": "products",
+									"type": "text"
+								},
+								{
+									"key": "files[]",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "files[]",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "files[]",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": "{{base_url}}/assets/1"
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "{{token}}"
+							}
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": "{{base_url}}/assets/3"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": {
+			"token": "{{token}}"
+		}
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

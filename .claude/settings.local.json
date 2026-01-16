@@ -8,7 +8,9 @@
       "Bash(npx tsc:*)",
       "Bash(tree:*)",
       "Bash(npx expo start --web)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(npx expo doctor)",
+      "Bash(npx expo export:*)"
     ]
   }
 }
