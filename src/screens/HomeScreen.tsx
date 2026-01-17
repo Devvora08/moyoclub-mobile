@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { initializeApi } from '../api/config';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -18,27 +17,45 @@ import DeliveryBanner from '../components/DeliveryBanner';
 import PromoBanner from '../components/PromoBanner';
 import HighProteinProductCard from '../components/HighProteinProductCard';
 import GridProductCard from '../components/GridProductCard';
-import { useProducts } from '../hooks/useProducts';
+import AddOnRecommendations from '../components/AddOnRecommendations';
+import { useProductsContext } from '../context/ProductsContext';
+import { useAddOnRecommendations } from '../hooks/useAddOnRecommendations';
 import { ProductDisplayData } from '../types/product';
+import {
+  getHighProteinProducts,
+  getBreakfastProducts,
+  getDealsProducts,
+} from '../api/products';
 
 const HomeScreen = () => {
-  // ============================================
-  // API Initialization - Get read-only token for browsing
-  // ============================================
-  const [apiReady, setApiReady] = useState(false);
+  // Get products from global context (API initialization handled by ProductsContext)
+  const { products, loading, error } = useProductsContext();
 
-  useEffect(() => {
-    const init = async () => {
-      // Initialize API - restores user token or falls back to API user
-      const success = await initializeApi();
-      setApiReady(success);
-    };
-    init();
-  }, []);
+  // Memoized filtered product lists
+  const highProteinProducts = useMemo(() => getHighProteinProducts(products), [products]);
+  const breakfastProducts = useMemo(() => getBreakfastProducts(products), [products]);
+  const dealsProducts = useMemo(() => getDealsProducts(products), [products]);
 
-  // Fetch products after API is initialized
-  const { products, loading, error, highProteinProducts, dealsProducts, breakfastProducts } = useProducts(apiReady);
-  // ============================================
+  // Get add-on recommendations based on cart items
+  const { recommendations, hasRecommendations, getRecommendationsForSection } = useAddOnRecommendations(products);
+
+  // Get section-specific recommendations
+  const highProteinRecommendations = useMemo(() =>
+    getRecommendationsForSection(highProteinProducts.map(p => p.id)),
+    [getRecommendationsForSection, highProteinProducts]
+  );
+  const trendingRecommendations = useMemo(() =>
+    getRecommendationsForSection(products.slice(0, 6).map(p => p.id)),
+    [getRecommendationsForSection, products]
+  );
+  const dealsRecommendations = useMemo(() =>
+    getRecommendationsForSection(dealsProducts.map(p => p.id)),
+    [getRecommendationsForSection, dealsProducts]
+  );
+  const organicRecommendations = useMemo(() =>
+    getRecommendationsForSection(products.filter(p => p.isOrganic).map(p => p.id)),
+    [getRecommendationsForSection, products]
+  );
 
   const categories = [
     {
@@ -271,6 +288,12 @@ const HomeScreen = () => {
               >
                 {highProteinProducts.slice(0, 6).map(renderHighProteinCard)}
               </ScrollView>
+
+              {/* Contextual Add-On Recommendations */}
+              <AddOnRecommendations
+                recommendations={highProteinRecommendations}
+                compact
+              />
             </View>
           </View>
         ) : null}
@@ -296,6 +319,12 @@ const HomeScreen = () => {
               >
                 {products.slice(0, 6).map(renderHighProteinCard)}
               </ScrollView>
+
+              {/* Contextual Add-On Recommendations */}
+              <AddOnRecommendations
+                recommendations={trendingRecommendations}
+                compact
+              />
             </View>
           </View>
         ) : null}
@@ -321,6 +350,12 @@ const HomeScreen = () => {
               >
                 {dealsProducts.slice(0, 6).map(renderHighProteinCard)}
               </ScrollView>
+
+              {/* Contextual Add-On Recommendations */}
+              <AddOnRecommendations
+                recommendations={dealsRecommendations}
+                compact
+              />
             </View>
           </View>
         ) : null}
@@ -346,6 +381,12 @@ const HomeScreen = () => {
               >
                 {products.filter(p => p.isOrganic).slice(0, 6).map(renderHighProteinCard)}
               </ScrollView>
+
+              {/* Contextual Add-On Recommendations */}
+              <AddOnRecommendations
+                recommendations={organicRecommendations}
+                compact
+              />
             </View>
           </View>
         ) : null}
@@ -366,6 +407,15 @@ const HomeScreen = () => {
                 <Text style={styles.filterText}>Filter</Text>
               </TouchableOpacity>
             </View>
+
+            {/* Add-On Recommendations for all products */}
+            {hasRecommendations && (
+              <AddOnRecommendations
+                recommendations={recommendations}
+                title="Complete Your Order"
+                subtitle="Goes well with items in your cart"
+              />
+            )}
 
             <View style={styles.gridContainer}>
               {products.map(renderGridCard)}
@@ -460,6 +510,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
+    shadowColor: '#4CAF50',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
   },
   star: {
     fontSize: 14,
@@ -476,12 +531,14 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f8f8f8',
     marginHorizontal: 16,
     marginBottom: 24,
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingVertical: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
   },
   searchIcon: {
     fontSize: 18,
@@ -524,6 +581,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#1a1a1a',
     marginBottom: 2,
+    letterSpacing: -0.3,
   },
   sectionSubtitle: {
     fontSize: 14,
@@ -542,8 +600,8 @@ const styles = StyleSheet.create({
   },
   beverageCard: {
     backgroundColor: '#E3F2FD',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 16,
+    padding: 18,
     marginHorizontal: 16,
     marginTop: 8,
     flexDirection: 'row',
@@ -551,6 +609,8 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
     minHeight: 80,
+    borderWidth: 1,
+    borderColor: '#BBDEFB',
   },
   beverageEmoji: {
     fontSize: 40,
@@ -588,11 +648,13 @@ const styles = StyleSheet.create({
   },
   statCard: {
     backgroundColor: '#FFF5F0',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 16,
+    padding: 18,
     flex: 1,
-    marginHorizontal: 4,
+    marginHorizontal: 6,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#FFE8DC',
   },
   statNumber: {
     fontSize: 24,
@@ -642,10 +704,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingVertical: 10,
+    borderRadius: 24,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: '#e8e8e8',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   filterIcon: {
     fontSize: 16,

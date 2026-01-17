@@ -185,6 +185,16 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   );
 
   /**
+   * Get cart item by product ID
+   */
+  const getCartItem = useCallback(
+    (productId: number): CartItem | undefined => {
+      return items.find(item => item.productId === productId);
+    },
+    [items]
+  );
+
+  /**
    * Check if a product is in cart
    */
   const isInCart = useCallback(
@@ -192,6 +202,32 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       return items.some(item => item.productId === productId);
     },
     [items]
+  );
+
+  /**
+   * Increment quantity of a product by productId
+   */
+  const incrementQuantity = useCallback(
+    (productId: number) => {
+      const cartItem = items.find(item => item.productId === productId);
+      if (cartItem) {
+        updateQuantity(cartItem.id, cartItem.quantity + 1);
+      }
+    },
+    [items, updateQuantity]
+  );
+
+  /**
+   * Decrement quantity of a product by productId
+   */
+  const decrementQuantity = useCallback(
+    (productId: number) => {
+      const cartItem = items.find(item => item.productId === productId);
+      if (cartItem) {
+        updateQuantity(cartItem.id, cartItem.quantity - 1);
+      }
+    },
+    [items, updateQuantity]
   );
 
   /**
@@ -225,7 +261,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     updateQuantity,
     clearCart,
     getItemQuantity,
+    getCartItem,
     isInCart,
+    incrementQuantity,
+    decrementQuantity,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

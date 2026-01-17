@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ImageSourcePropType, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useCart } from '../hooks/useCart';
 import { useNavigation } from '@react-navigation/native';
 
@@ -28,7 +29,7 @@ const GridProductCard: React.FC<GridProductCardProps> = ({
   image,
   imageUri,
 }) => {
-  const { addToCart, getItemQuantity } = useCart();
+  const { addToCart, getItemQuantity, incrementQuantity, decrementQuantity } = useCart();
   const navigation = useNavigation();
 
   const imageSource = imageUri ? { uri: imageUri } : image;
@@ -63,8 +64,16 @@ const GridProductCard: React.FC<GridProductCardProps> = ({
     }
   };
 
+  const handleIncrement = () => {
+    incrementQuantity(id);
+  };
+
+  const handleDecrement = () => {
+    decrementQuantity(id);
+  };
+
   return (
-    <TouchableOpacity style={styles.card}>
+    <TouchableOpacity style={styles.card} activeOpacity={0.9}>
       <View style={styles.imageContainer}>
         {imageSource ? (
           <Image source={imageSource} style={styles.productImage} resizeMode="cover" />
@@ -74,23 +83,44 @@ const GridProductCard: React.FC<GridProductCardProps> = ({
             <Text style={styles.discountText}>{discount}</Text>
           </View>
         ) : null}
-        {isOrganic ? (
+        {isOrganic && !discount ? (
           <View style={styles.organicBadge}>
             <Text style={styles.organicIcon}>✓</Text>
             <Text style={styles.organicText}>Organic</Text>
           </View>
         ) : null}
-        <TouchableOpacity style={styles.favoriteButton}>
+        <TouchableOpacity style={styles.favoriteButton} activeOpacity={0.8}>
           <Text style={styles.heartIcon}>♡</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.addButtonFloat, quantityInCart > 0 && styles.addButtonFloatActive]}
-          onPress={handleAddToCart}
-        >
-          <Text style={styles.addButtonFloatText}>
-            {quantityInCart > 0 ? quantityInCart : '+'}
-          </Text>
-        </TouchableOpacity>
+
+        {/* Floating Add/Quantity Control */}
+        {quantityInCart === 0 ? (
+          <TouchableOpacity
+            style={styles.addButtonFloat}
+            onPress={handleAddToCart}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="add" size={22} color="#fff" />
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.quantityControlFloat}>
+            <TouchableOpacity
+              style={styles.quantityButtonFloat}
+              onPress={handleDecrement}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="remove" size={16} color="#fff" />
+            </TouchableOpacity>
+            <Text style={styles.quantityTextFloat}>{quantityInCart}</Text>
+            <TouchableOpacity
+              style={styles.quantityButtonFloat}
+              onPress={handleIncrement}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="add" size={16} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
       <View style={styles.info}>
         <View style={styles.ratingRow}>
@@ -116,22 +146,22 @@ const styles = StyleSheet.create({
   card: {
     width: '48%',
     marginBottom: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     backgroundColor: '#fff',
     overflow: 'visible',
-    elevation: 2,
+    elevation: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
   imageContainer: {
     height: 180,
     position: 'relative',
     backgroundColor: '#f5f5f5',
     overflow: 'hidden',
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
   },
   productImage: {
     width: '100%',
@@ -175,12 +205,12 @@ const styles = StyleSheet.create({
   },
   favoriteButton: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#fff',
+    top: 10,
+    right: 10,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -190,23 +220,49 @@ const styles = StyleSheet.create({
   },
   addButtonFloat: {
     position: 'absolute',
-    bottom: 8,
-    right: 8,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    bottom: 10,
+    right: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: '#FF6B35',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#FF6B35',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.35,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  addButtonFloatActive: {
-    backgroundColor: '#4CAF50',
+  quantityControlFloat: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FF6B35',
+    borderRadius: 20,
+    paddingHorizontal: 4,
+    height: 40,
+    shadowColor: '#FF6B35',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.35,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  addButtonFloatText: {
+  quantityButtonFloat: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quantityTextFloat: {
+    fontSize: 14,
+    fontWeight: '700',
     color: '#fff',
-    fontSize: 20,
-    fontWeight: '600',
-    lineHeight: 24,
+    minWidth: 20,
+    textAlign: 'center',
   },
   info: {
     padding: 12,

@@ -20,7 +20,11 @@ const BrowseScreen = () => {
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.text}>Browse Screen</Text>
+        <View style={styles.emptyIconContainer}>
+          <Ionicons name="search" size={48} color="#ddd" />
+        </View>
+        <Text style={styles.title}>Browse Menu</Text>
+        <Text style={styles.subtitle}>Discover our delicious offerings</Text>
       </View>
     </SafeAreaView>
   );
@@ -57,11 +61,28 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 32,
   },
-  text: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#333',
+  emptyIconContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#f8f8f8',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: 8,
+    letterSpacing: -0.3,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: '#888',
+    textAlign: 'center',
   },
 });
 

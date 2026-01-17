@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ImageSourcePropType, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useCart } from '../hooks/useCart';
 import { useNavigation } from '@react-navigation/native';
 
@@ -30,7 +31,7 @@ const HighProteinProductCard: React.FC<HighProteinProductCardProps> = ({
   image,
   imageUri,
 }) => {
-  const { addToCart, getItemQuantity } = useCart();
+  const { addToCart, getItemQuantity, incrementQuantity, decrementQuantity } = useCart();
   const navigation = useNavigation();
 
   const imageSource = imageUri ? { uri: imageUri } : image;
@@ -55,22 +56,26 @@ const HighProteinProductCard: React.FC<HighProteinProductCardProps> = ({
           {
             text: 'Login',
             onPress: () => {
-              // Navigate to Account tab for login
               (navigation as any).navigate('Account');
             },
           },
         ]
       );
-    } else if (result.success) {
-      // Optional: Show a brief success feedback
-      // Could use a toast notification here
-    } else {
+    } else if (!result.success) {
       Alert.alert('Error', result.message);
     }
   };
 
+  const handleIncrement = () => {
+    incrementQuantity(id);
+  };
+
+  const handleDecrement = () => {
+    decrementQuantity(id);
+  };
+
   return (
-    <TouchableOpacity style={styles.card}>
+    <TouchableOpacity style={styles.card} activeOpacity={0.9}>
       <View style={styles.imageContainer}>
         {imageSource ? (
           <Image source={imageSource} style={styles.productImage} resizeMode="cover" />
@@ -80,7 +85,7 @@ const HighProteinProductCard: React.FC<HighProteinProductCardProps> = ({
             <Text style={styles.discountText}>{discount}</Text>
           </View>
         ) : null}
-        {isOrganic ? (
+        {isOrganic && !discount ? (
           <View style={styles.organicBadge}>
             <Text style={styles.organicIcon}>✓</Text>
             <Text style={styles.organicText}>Organic</Text>
@@ -107,14 +112,36 @@ const HighProteinProductCard: React.FC<HighProteinProductCardProps> = ({
               <Text style={styles.originalPrice}>₹{originalPrice}</Text>
             ) : null}
           </View>
-          <TouchableOpacity
-            style={[styles.addButton, quantityInCart > 0 && styles.addButtonActive]}
-            onPress={handleAddToCart}
-          >
-            <Text style={[styles.addButtonText, quantityInCart > 0 && styles.addButtonTextActive]}>
-              {quantityInCart > 0 ? `${quantityInCart}` : 'Add'}
-            </Text>
-          </TouchableOpacity>
+
+          {/* Add/Remove Controls */}
+          {quantityInCart === 0 ? (
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={handleAddToCart}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.addButtonText}>ADD</Text>
+              <Text style={styles.plusIcon}>+</Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.quantityControl}>
+              <TouchableOpacity
+                style={styles.quantityButton}
+                onPress={handleDecrement}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="remove" size={16} color="#FF6B35" />
+              </TouchableOpacity>
+              <Text style={styles.quantityText}>{quantityInCart}</Text>
+              <TouchableOpacity
+                style={styles.quantityButton}
+                onPress={handleIncrement}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="add" size={16} color="#FF6B35" />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </View>
     </TouchableOpacity>
@@ -126,22 +153,22 @@ const styles = StyleSheet.create({
     width: 160,
     marginRight: 12,
     marginBottom: 8,
-    borderRadius: 12,
+    borderRadius: 16,
     backgroundColor: '#fff',
     overflow: 'visible',
-    elevation: 2,
+    elevation: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
   imageContainer: {
     height: 160,
     position: 'relative',
     backgroundColor: '#f5f5f5',
     overflow: 'hidden',
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
   },
   productImage: {
     width: '100%',
@@ -211,6 +238,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#1a1a1a',
     marginBottom: 4,
+    minHeight: 36,
   },
   nutritionInfo: {
     fontSize: 12,
@@ -223,38 +251,65 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: 'column',
   },
   price: {
     fontSize: 16,
     fontWeight: '700',
     color: '#FF6B35',
-    marginRight: 6,
   },
   originalPrice: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#999',
     textDecorationLine: 'line-through',
   },
   addButton: {
-    backgroundColor: '#FF6B35',
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 16,
-    minWidth: 50,
+    flexDirection: 'row',
     alignItems: 'center',
-  },
-  addButtonActive: {
-    backgroundColor: '#4CAF50',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#FF6B35',
+    minWidth: 70,
   },
   addButtonText: {
-    color: '#fff',
+    color: '#FF6B35',
     fontSize: 13,
     fontWeight: '700',
+    letterSpacing: 0.5,
   },
-  addButtonTextActive: {
-    color: '#fff',
+  plusIcon: {
+    color: '#FF6B35',
+    fontSize: 14,
+    fontWeight: '700',
+    marginLeft: 2,
+  },
+  quantityControl: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF5F0',
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: '#FF6B35',
+    overflow: 'hidden',
+  },
+  quantityButton: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+  },
+  quantityText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FF6B35',
+    minWidth: 24,
+    textAlign: 'center',
+    paddingHorizontal: 4,
   },
 });
 

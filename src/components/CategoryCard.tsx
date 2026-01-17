@@ -31,12 +31,17 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     width: '48%',
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     marginBottom: 16,
     minHeight: 160,
     position: 'relative',
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
   },
   content: {
     flex: 1,
@@ -50,6 +55,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#1a1a1a',
     marginBottom: 4,
+    letterSpacing: -0.2,
   },
   subtitle: {
     fontSize: 13,

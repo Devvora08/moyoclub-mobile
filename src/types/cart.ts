@@ -47,7 +47,10 @@ export interface CartContextValue {
   updateQuantity: (cartItemId: string, quantity: number) => void;
   clearCart: () => void;
   getItemQuantity: (productId: number) => number;
+  getCartItem: (productId: number) => CartItem | undefined;
   isInCart: (productId: number) => boolean;
+  incrementQuantity: (productId: number) => void;
+  decrementQuantity: (productId: number) => void;
 }
 
 /**
