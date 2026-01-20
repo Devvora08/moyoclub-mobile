@@ -5,20 +5,26 @@ import {
   SingleProductResponse,
   ProductDisplayData,
   ProductFilters,
+  MediaAsset,
 } from '../types/product';
 
-// Image base URL
-const IMAGE_BASE_URL = 'https://dev-moyoclub.one/upload/products/img';
-
 /**
- * Constructs the full image URL from product id and image filename
- * @param productId - The product ID
- * @param img - The image filename from API (e.g., "20260114_348980")
+ * Extracts the image URL from the product's media array
+ * @param media - The media array from the product
+ * @param size - The image size to retrieve ('medium' | 'thumb' | 'original')
  * @returns Full image URL or null
  */
-export const getProductImageUrl = (productId: number, img: string | null): string | null => {
-  if (!img) return null;
-  return `${IMAGE_BASE_URL}/${productId}/${img}_m.jpg`;
+export const getProductImageUrl = (
+  media: MediaAsset[] | undefined,
+  size: 'medium' | 'thumb' | 'original' = 'medium'
+): string | null => {
+  if (!media || media.length === 0) return null;
+
+  // Find the first image type media asset
+  const imageMedia = media.find(m => m.type === 'image');
+  if (!imageMedia) return null;
+
+  return imageMedia.meta?.urls?.[size] || null;
 };
 
 /**
@@ -43,22 +49,22 @@ export const fetchProductById = async (id: number): Promise<Product> => {
  * @returns Transformed product data for UI components
  */
 export const transformProductForDisplay = (product: Product): ProductDisplayData => {
-  const price = parseFloat(product.price);
+  const originalPrice = parseFloat(product.price);
 
   // Calculate discount from campaigns if any
-  let originalPrice: number | undefined;
+  let displayPrice = originalPrice;
   let discountText: string | undefined;
+  let hasDiscount = false;
 
   if (product.campaigns && product.campaigns.length > 0) {
     const activeCampaign = product.campaigns.find(c => c.status === 'active');
-    if (activeCampaign) {
-      const discountValue = parseFloat(activeCampaign.discount_value);
-      if (activeCampaign.discount_type === 'percentage') {
-        originalPrice = Math.round(price / (1 - discountValue / 100));
-        discountText = `${discountValue}% OFF`;
-      } else {
-        originalPrice = price + discountValue;
-        discountText = `₹${discountValue} OFF`;
+    if (activeCampaign && activeCampaign.promo_price) {
+      const promoPrice = parseFloat(activeCampaign.promo_price);
+      if (promoPrice < originalPrice) {
+        displayPrice = promoPrice;
+        hasDiscount = true;
+        const discountPercent = Math.round(((originalPrice - promoPrice) / originalPrice) * 100);
+        discountText = `${discountPercent}% OFF`;
       }
     }
   }
@@ -72,9 +78,9 @@ export const transformProductForDisplay = (product: Product): ProductDisplayData
   return {
     id: product.id,
     name: product.product_name,
-    price,
-    originalPrice,
-    imageUri: getProductImageUrl(product.id, product.img),
+    price: displayPrice,
+    originalPrice: hasDiscount ? originalPrice : undefined,
+    imageUri: getProductImageUrl(product.media),
     description: product.description,
     badges: product.badges,
     type: product.type,

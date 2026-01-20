@@ -2,7 +2,7 @@
 
 export type ProductType = 'veg' | 'non-veg';
 export type ProductStatus = 'active' | 'inactive';
-export type MealTime = '0' | '1'; // '0' = false, '1' = true
+export type MealTime = '0' | '1' | null; // '0' = false, '1' = true, null = not set
 
 // Base product fields shared between Product and Addon
 export interface BaseProduct {
@@ -39,21 +39,62 @@ export interface Addon extends BaseProduct {
     product_id: string;
     addon_product_id: string;
   };
+  media?: MediaAsset[];
 }
 
-// Campaign structure (based on typical e-commerce patterns)
+// Campaign structure
 export interface Campaign {
   id: number;
-  name: string;
-  description: string | null;
-  discount_type: 'percentage' | 'fixed';
-  discount_value: string;
+  campaign_code: string;
+  campaign_name: string;
+  campaign_source: string;
+  venue: string;
+  tv_channel: string;
+  promo_price: string;
+  status: 'active' | 'inactive';
   start_date: string;
   end_date: string;
-  status: 'active' | 'inactive';
+  created_at: string;
+  updated_at: string;
   pivot?: {
     product_id: string;
     campaign_id: string;
+    created_at: string;
+    updated_at: string;
+  };
+}
+
+// Media asset structure for product images
+export interface MediaAsset {
+  id: number;
+  main_category: string;
+  category: string;
+  type: string;
+  base_name: string;
+  meta: {
+    base_name: string;
+    files: {
+      original: string;
+      medium: string;
+      thumb: string;
+    };
+    urls: {
+      original: string;
+      medium: string;
+      thumb: string;
+    };
+    mime: string;
+    size: number;
+  };
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  pivot?: {
+    product_id: string;
+    asset_id: string;
+    created_at: string;
+    updated_at: string;
+    type: string | null;
   };
 }
 
@@ -61,6 +102,7 @@ export interface Campaign {
 export interface Product extends BaseProduct {
   campaigns: Campaign[];
   addons: Addon[];
+  media: MediaAsset[];
 }
 
 // API Response wrapper

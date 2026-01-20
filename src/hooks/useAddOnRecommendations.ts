@@ -33,7 +33,7 @@ const transformAddonToRecommendation = (
     id: addon.id,
     name: addon.product_name,
     price: parseFloat(addon.price),
-    imageUri: getProductImageUrl(addon.id, addon.img),
+    imageUri: getProductImageUrl(addon.media),
     parentProductId: parentProduct.id,
     parentProductName: parentProduct.name,
     protein: addon.protein ? `${addon.protein}g` : null,
