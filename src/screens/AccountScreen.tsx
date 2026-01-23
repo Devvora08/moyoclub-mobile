@@ -15,14 +15,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../hooks/useCart';
+import PrivacyPolicyScreen from './PrivacyPolicyScreen';
+import TermsConditionsScreen from './TermsConditionsScreen';
 
 type AuthMode = 'login' | 'signup';
+type LegalScreen = 'none' | 'terms' | 'privacy';
 
 const AccountScreen = () => {
   const { user, isAuthenticated, isLoading, isCheckingAuth, login, signup, logout } = useAuth();
   const { totalItems } = useCart();
 
   const [authMode, setAuthMode] = useState<AuthMode>('login');
+  const [legalScreen, setLegalScreen] = useState<LegalScreen>('none');
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState('');
@@ -141,6 +145,14 @@ const AccountScreen = () => {
       },
     ]);
   };
+
+  // Show legal screens if requested
+  if (legalScreen === 'terms') {
+    return <TermsConditionsScreen onGoBack={() => setLegalScreen('none')} />;
+  }
+  if (legalScreen === 'privacy') {
+    return <PrivacyPolicyScreen onGoBack={() => setLegalScreen('none')} />;
+  }
 
   // Loading state while checking auth
   if (isCheckingAuth) {
@@ -573,8 +585,13 @@ const AccountScreen = () => {
 
               <Text style={styles.termsText}>
                 By signing up, you agree to our{' '}
-                <Text style={styles.linkText}>Terms of Service</Text> and{' '}
-                <Text style={styles.linkText}>Privacy Policy</Text>
+                <Text style={styles.linkText} onPress={() => setLegalScreen('terms')}>
+                  Terms of Service
+                </Text>{' '}
+                and{' '}
+                <Text style={styles.linkText} onPress={() => setLegalScreen('privacy')}>
+                  Privacy Policy
+                </Text>
               </Text>
             </View>
           )}

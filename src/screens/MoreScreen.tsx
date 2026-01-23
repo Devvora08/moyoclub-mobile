@@ -1,9 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import AboutUsScreen from './AboutUsScreen';
+import PrivacyPolicyScreen from './PrivacyPolicyScreen';
+import TermsConditionsScreen from './TermsConditionsScreen';
+
+type ScreenType = 'menu' | 'aboutUs' | 'privacyPolicy' | 'termsConditions';
 
 const MoreScreen = () => {
+  const [currentScreen, setCurrentScreen] = useState<ScreenType>('menu');
+
   const adminItems = [
     {
       icon: '🛡️',
@@ -37,18 +44,21 @@ const MoreScreen = () => {
       title: 'About Us',
       subtitle: 'Learn about MoyoClub',
       bgColor: '#FFE8DC',
+      screen: 'aboutUs' as ScreenType,
     },
     {
       icon: '📄',
       title: 'Terms & Conditions',
       subtitle: 'Read our policies',
       bgColor: '#FFE8DC',
+      screen: 'termsConditions' as ScreenType,
     },
     {
       icon: '📋',
       title: 'Privacy Policy',
       subtitle: 'How we protect your data',
       bgColor: '#FFE8DC',
+      screen: 'privacyPolicy' as ScreenType,
     },
   ];
 
@@ -67,8 +77,19 @@ const MoreScreen = () => {
     },
   ];
 
+  const goBack = () => setCurrentScreen('menu');
+  const navigateTo = (screen: ScreenType) => setCurrentScreen(screen);
+
   const renderMenuItem = (item: any) => (
-    <TouchableOpacity key={item.title} style={styles.menuItem}>
+    <TouchableOpacity
+      key={item.title}
+      style={styles.menuItem}
+      onPress={() => {
+        if (item.screen) {
+          setCurrentScreen(item.screen);
+        }
+      }}
+    >
       <View style={[styles.iconContainer, { backgroundColor: item.bgColor }]}>
         <Text style={styles.itemIcon}>{item.icon}</Text>
       </View>
@@ -80,6 +101,18 @@ const MoreScreen = () => {
     </TouchableOpacity>
   );
 
+  // Render sub-screens
+  if (currentScreen === 'aboutUs') {
+    return <AboutUsScreen onGoBack={goBack} onNavigate={navigateTo} />;
+  }
+  if (currentScreen === 'privacyPolicy') {
+    return <PrivacyPolicyScreen onGoBack={goBack} />;
+  }
+  if (currentScreen === 'termsConditions') {
+    return <TermsConditionsScreen onGoBack={goBack} />;
+  }
+
+  // Render menu
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
