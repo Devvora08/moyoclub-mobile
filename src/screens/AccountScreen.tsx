@@ -15,8 +15,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../hooks/useCart';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types/navigation';
 import PrivacyPolicyScreen from './PrivacyPolicyScreen';
 import TermsConditionsScreen from './TermsConditionsScreen';
+
+type AccountNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 type AuthMode = 'login' | 'signup';
 type LegalScreen = 'none' | 'terms' | 'privacy';
@@ -24,6 +29,7 @@ type LegalScreen = 'none' | 'terms' | 'privacy';
 const AccountScreen = () => {
   const { user, isAuthenticated, isLoading, isCheckingAuth, login, signup, logout } = useAuth();
   const { totalItems } = useCart();
+  const navigation = useNavigation<AccountNavigationProp>();
 
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [legalScreen, setLegalScreen] = useState<LegalScreen>('none');
@@ -213,7 +219,7 @@ const AccountScreen = () => {
               <Ionicons name="chevron-forward" size={20} color="#ccc" />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuItem}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('MyOrders')}>
               <Ionicons name="receipt-outline" size={22} color="#666" />
               <Text style={styles.menuText}>Order History</Text>
               <Ionicons name="chevron-forward" size={20} color="#ccc" />

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const API_BASE_URL = 'https://api.dev-moyoclub.one/api';
+export const API_BASE_URL = 'https://api.moyoclub.one/api';
 
 // Read-only API user credentials (for unauthenticated users to view products, etc.)
 const API_USER = {

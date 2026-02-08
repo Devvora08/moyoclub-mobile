@@ -5,19 +5,37 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
     "splash": {
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#FF6B35"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.moyoclub.app"
+      "bundleIdentifier": "com.moyoclub.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
-      "package": "com.moyoclub.app"
+      "package": "com.moyoclub.app",
+      "versionCode": 2,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FF6B35"
+      }
     },
     "web": {
-      "bundler": "metro"
-    }
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b2b55977-f2f1-48a8-8e11-6fdb16f160f9"
+      }
+    },
+    "owner": "lkothapalli"
   }
 }

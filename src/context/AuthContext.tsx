@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User, LoginResponse } from '../types/auth';
 import { login as apiLogin, signup as apiSignup, logout as apiLogout } from '../api/auth';
 import { setAuthToken, clearAuthToken, initializeApi, getTokenStatus } from '../api/config';
+import { WAREHOUSE_CREDENTIALS, WAREHOUSE_USER } from '../data/warehouseData';
 
 /**
  * Auth context value interface
@@ -12,6 +13,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   isLoading: boolean;
   isCheckingAuth: boolean;
+  isWarehouseUser: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
   signup: (data: SignupData) => Promise<{ success: boolean; message: string }>;
   logout: () => Promise<void>;
@@ -118,8 +120,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
     try {
+      const trimmedEmail = email.trim().toLowerCase();
+
+      // Intercept warehouse credentials
+      if (
+        trimmedEmail === WAREHOUSE_CREDENTIALS.email &&
+        password === WAREHOUSE_CREDENTIALS.password
+      ) {
+        const dummyToken = 'warehouse-dummy-token';
+        await saveUserSession(WAREHOUSE_USER, dummyToken);
+        setUser(WAREHOUSE_USER);
+        return {
+          success: true,
+          message: `Welcome back, ${WAREHOUSE_USER.first_name}!`,
+        };
+      }
+
       const response: LoginResponse = await apiLogin({
-        email: email.trim(),
+        email: trimmedEmail,
         password,
       });
 
@@ -183,7 +201,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = useCallback(async () => {
     setIsLoading(true);
     try {
-      await apiLogout();
+      const isWarehouse = user?.role?.slug === 'warehouse-manager';
+      if (!isWarehouse) {
+        await apiLogout();
+      }
       await clearUserSession();
       setUser(null);
       clearAuthToken();
@@ -194,7 +215,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [user]);
 
   /**
    * Refresh auth state (re-check session)
@@ -209,6 +230,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isAuthenticated: !!user,
     isLoading,
     isCheckingAuth,
+    isWarehouseUser: user?.role?.slug === 'warehouse-manager',
     login,
     signup,
     logout,

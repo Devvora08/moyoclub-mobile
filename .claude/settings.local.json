@@ -12,7 +12,29 @@
       "Bash(npx expo doctor)",
       "Bash(npx expo export:*)",
       "Bash(node test-addons.js:*)",
-      "Bash(npx expo install:*)"
+      "Bash(npx expo install:*)",
+      "Bash(eas:*)",
+      "Bash(npx eas-cli build:configure:*)",
+      "Bash(npx eas-cli:*)",
+      "Bash(dir node_modules.bineas*)",
+      "Bash(npm --version)",
+      "Bash(node --version:*)",
+      "Bash(npm i:*)",
+      "Bash(ls:*)",
+      "Bash(npm root:*)",
+      "Bash(npm bin:*)",
+      "Bash(npm config:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      "Bash(yes:*)",
+      "Bash(EXPO_TOKEN=\"UxOhMLkHUsdSkpQzLPj6Udjy18DRn48vWhAyQYqn\" npx eas-cli:*)",
+      "Bash(keytool:*)",
+      "Bash(EXPO_TOKEN=\"UxOhMLkHUsdSkpQzLPj6Udjy18DRn48vWhAyQYqn\" EXPO_APPLE_ID=\"lohith.kothapalli@gmail.com\" EXPO_APPLE_APP_SPECIFIC_PASSWORD=\"izfh-scla-ygnp-cduf\" winpty npx eas-cli build:*)",
+      "Bash(EXPO_TOKEN=\"UxOhMLkHUsdSkpQzLPj6Udjy18DRn48vWhAyQYqn\" EXPO_APPLE_ID=\"lohith.kothapalli@gmail.com\" EXPO_APPLE_APP_SPECIFIC_PASSWORD=\"izfh-scla-ygnp-cduf\" winpty \"/c/Program Files/nodejs/npx.cmd\" eas-cli build --platform ios --profile production --no-wait)",
+      "Bash(powershell.exe -ExecutionPolicy Bypass -File \"C:/Users/ADMIN/Desktop/moyoclub/build-ios.ps1\")",
+      "Bash(npm ls:*)",
+      "Bash(taskkill:*)",
+      "Bash(curl:*)"
     ]
   }
 }

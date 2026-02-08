@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,18 +7,25 @@ import {
   ScrollView,
   Image,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { CartItem } from '../types/cart';
+import { RootStackParamList } from '../types/navigation';
+import { createOrder, generateTransactionId, fetchMyOrders } from '../api/orders';
+
+type CartNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const CartScreen = () => {
   const { items, totalItems, totalPrice, updateQuantity, removeFromCart, clearCart } = useCart();
   const { isAuthenticated } = useAuth();
-  const navigation = useNavigation();
+  const navigation = useNavigation<CartNavigationProp>();
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
   const handleIncreaseQuantity = (item: CartItem) => {
     updateQuantity(item.id, item.quantity + 1);
@@ -73,7 +80,7 @@ const CartScreen = () => {
     );
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (!isAuthenticated) {
       Alert.alert(
         'Login Required',
@@ -88,8 +95,30 @@ const CartScreen = () => {
       );
       return;
     }
-    // TODO: Implement checkout flow
-    Alert.alert('Checkout', 'Checkout functionality coming soon!');
+
+    setIsPlacingOrder(true);
+    try {
+      const myOrders = await fetchMyOrders();
+      const hasPending = myOrders.data.some(
+        (o) => o.status.toLowerCase() === 'pending'
+      );
+      if (hasPending) {
+        Alert.alert(
+          'Pending Order',
+          'You already have a pending order. Please wait for it to be processed before placing a new one.'
+        );
+        return;
+      }
+
+      const transactionId = generateTransactionId();
+      const order = await createOrder(items, transactionId);
+      navigation.navigate('OrderConfirmation', { order });
+    } catch (error: any) {
+      const message = error?.response?.data?.message || 'Failed to place order. Please try again.';
+      Alert.alert('Order Failed', message);
+    } finally {
+      setIsPlacingOrder(false);
+    }
   };
 
   const renderCartItem = (item: CartItem) => {
@@ -235,9 +264,19 @@ const CartScreen = () => {
           <Text style={styles.checkoutTotalLabel}>Total</Text>
           <Text style={styles.checkoutTotalValue}>₹{totalPrice}</Text>
         </View>
-        <TouchableOpacity style={styles.checkoutButton} onPress={handleCheckout}>
-          <Text style={styles.checkoutButtonText}>Checkout</Text>
-          <Ionicons name="arrow-forward" size={20} color="#fff" />
+        <TouchableOpacity
+          style={[styles.checkoutButton, isPlacingOrder && styles.checkoutButtonDisabled]}
+          onPress={handleCheckout}
+          disabled={isPlacingOrder}
+        >
+          {isPlacingOrder ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <>
+              <Text style={styles.checkoutButtonText}>Checkout</Text>
+              <Ionicons name="arrow-forward" size={20} color="#fff" />
+            </>
+          )}
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -488,6 +527,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
+  },
+  checkoutButtonDisabled: {
+    opacity: 0.7,
   },
   checkoutButtonText: {
     color: '#fff',

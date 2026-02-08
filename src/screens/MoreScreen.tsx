@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AboutUsScreen from './AboutUsScreen';
 import PrivacyPolicyScreen from './PrivacyPolicyScreen';
 import TermsConditionsScreen from './TermsConditionsScreen';
+import WarehouseScreen from './warehouse/WarehouseScreen';
+import { useAuth } from '../context/AuthContext';
 
-type ScreenType = 'menu' | 'aboutUs' | 'privacyPolicy' | 'termsConditions';
+type ScreenType = 'menu' | 'aboutUs' | 'privacyPolicy' | 'termsConditions' | 'warehouse';
 
 const MoreScreen = () => {
   const [currentScreen, setCurrentScreen] = useState<ScreenType>('menu');
+  const { user } = useAuth();
+  const isWarehouseManager = user?.role?.slug === 'warehouse-manager';
 
   const adminItems = [
     {
@@ -29,6 +33,13 @@ const MoreScreen = () => {
       title: 'Warehouse',
       subtitle: 'Logistics & inventory',
       bgColor: '#E0F7FA',
+      onPress: () => {
+        if (isWarehouseManager) {
+          setCurrentScreen('warehouse');
+        } else {
+          Alert.alert('Access Denied', 'You do not have permission to access the warehouse dashboard.');
+        }
+      },
     },
     {
       icon: '📣',
@@ -85,7 +96,9 @@ const MoreScreen = () => {
       key={item.title}
       style={styles.menuItem}
       onPress={() => {
-        if (item.screen) {
+        if (item.onPress) {
+          item.onPress();
+        } else if (item.screen) {
           setCurrentScreen(item.screen);
         }
       }}
@@ -102,6 +115,9 @@ const MoreScreen = () => {
   );
 
   // Render sub-screens
+  if (currentScreen === 'warehouse') {
+    return <WarehouseScreen onGoBack={goBack} />;
+  }
   if (currentScreen === 'aboutUs') {
     return <AboutUsScreen onGoBack={goBack} onNavigate={navigateTo} />;
   }

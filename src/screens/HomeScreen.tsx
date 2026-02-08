@@ -4,20 +4,23 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TextInput,
+
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Logo from '../components/Logo';
-import CategoryCard from '../components/CategoryCard';
 import ProductCard from '../components/ProductCard';
 import DeliveryBanner from '../components/DeliveryBanner';
 import PromoBanner from '../components/PromoBanner';
 import HighProteinProductCard from '../components/HighProteinProductCard';
 import GridProductCard from '../components/GridProductCard';
 import AddOnRecommendations from '../components/AddOnRecommendations';
+import HeroSection from '../components/HeroSection';
+import ShopByCategory from '../components/ShopByCategory';
+import WhyChooseUs from '../components/WhyChooseUs';
+import Footer from '../components/Footer';
 import { useProductsContext } from '../context/ProductsContext';
 import { useAddOnRecommendations } from '../hooks/useAddOnRecommendations';
 import { ProductDisplayData } from '../types/product';
@@ -56,43 +59,6 @@ const HomeScreen = () => {
     getRecommendationsForSection(products.filter(p => p.isOrganic).map(p => p.id)),
     [getRecommendationsForSection, products]
   );
-
-  const categories = [
-    {
-      title: 'Ready to Eat',
-      subtitle: 'Sweets & Snacks',
-      backgroundColor: '#FFE8DC',
-      accentColor: '#FF6B35',
-      emoji: '🍬',
-    },
-    {
-      title: 'Ready to Cook',
-      subtitle: 'Mixes & Batters',
-      backgroundColor: '#F5EDD7',
-      accentColor: '#C9A66B',
-      emoji: '👨‍🍳',
-    },
-    {
-      title: 'Fresh & Custom',
-      subtitle: '24hr Advance',
-      backgroundColor: '#E8F5E9',
-      accentColor: '#4CAF50',
-      emoji: '🥗',
-    },
-    {
-      title: 'Grocery Staples',
-      subtitle: 'Rice, Dal & More',
-      backgroundColor: '#F5EDD7',
-      accentColor: '#8B6F47',
-      emoji: '🌾',
-    },
-  ];
-
-  const beverageCategory = {
-    title: 'Beverages',
-    subtitle: 'Traditional Drinks',
-    emoji: '🥤',
-  };
 
   // Helper function to render product card based on product data
   const renderProductCard = (product: ProductDisplayData) => (
@@ -185,55 +151,11 @@ const HomeScreen = () => {
           </View>
         </View>
 
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <Text style={styles.searchIcon}>🔍</Text>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search for sweets, snacks, groceries..."
-            placeholderTextColor="#999"
-          />
-        </View>
+        {/* Hero Section */}
+        <HeroSection />
 
-        {/* Shop by Category */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeaderSimple}>
-            <Text style={styles.sectionTitle}>Shop by Category</Text>
-            <Text style={styles.sectionSubtitle}>What would you like today?</Text>
-          </View>
-
-          <View style={styles.categoryGrid}>
-            {categories.map((category, index) => (
-              <CategoryCard key={index} {...category} />
-            ))}
-          </View>
-
-          {/* Beverages - Full Width */}
-          <TouchableOpacity style={styles.beverageCard}>
-            <Text style={styles.beverageEmoji}>{beverageCategory.emoji}</Text>
-            <View style={styles.beverageInfo}>
-              <Text style={styles.beverageTitle}>{beverageCategory.title}</Text>
-              <Text style={styles.beverageSubtitle}>{beverageCategory.subtitle}</Text>
-            </View>
-            <View style={styles.beverageAccent} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Stats Section */}
-        <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>500+</Text>
-            <Text style={styles.statLabel}>Happy Customers</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>50+</Text>
-            <Text style={styles.statLabel}>Partner Farms</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>100%</Text>
-            <Text style={styles.statLabel}>Organic</Text>
-          </View>
-        </View>
+        {/* Shop by Category - Redesigned */}
+        <ShopByCategory />
 
         {/* Delivery Banner */}
         <DeliveryBanner />
@@ -423,6 +345,12 @@ const HomeScreen = () => {
           </View>
         ) : null}
 
+        {/* Why Choose Us */}
+        <WhyChooseUs />
+
+        {/* Footer */}
+        <Footer />
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -480,12 +408,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
-  logo: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#FF6B35',
-    marginBottom: 4,
-  },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -528,33 +450,8 @@ const styles = StyleSheet.create({
   cartIconButton: {
     padding: 4,
   },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f8f8f8',
-    marginHorizontal: 16,
-    marginBottom: 24,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#f0f0f0',
-  },
-  searchIcon: {
-    fontSize: 18,
-    marginRight: 8,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 15,
-    color: '#333',
-  },
   section: {
     marginBottom: 24,
-  },
-  sectionHeaderSimple: {
-    paddingHorizontal: 16,
-    marginBottom: 16,
   },
   sectionWithBackground: {
     backgroundColor: '#FFF5F0',
@@ -592,80 +489,8 @@ const styles = StyleSheet.create({
     color: '#FF6B35',
     fontWeight: '600',
   },
-  categoryGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-  },
-  beverageCard: {
-    backgroundColor: '#E3F2FD',
-    borderRadius: 16,
-    padding: 18,
-    marginHorizontal: 16,
-    marginTop: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    position: 'relative',
-    overflow: 'hidden',
-    minHeight: 80,
-    borderWidth: 1,
-    borderColor: '#BBDEFB',
-  },
-  beverageEmoji: {
-    fontSize: 40,
-    marginRight: 16,
-  },
-  beverageInfo: {
-    flex: 1,
-  },
-  beverageTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1a1a1a',
-    marginBottom: 2,
-  },
-  beverageSubtitle: {
-    fontSize: 13,
-    color: '#666',
-  },
-  beverageAccent: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 4,
-    backgroundColor: '#2196F3',
-  },
   productsContainer: {
     paddingHorizontal: 16,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    marginBottom: 24,
-  },
-  statCard: {
-    backgroundColor: '#FFF5F0',
-    borderRadius: 16,
-    padding: 18,
-    flex: 1,
-    marginHorizontal: 6,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#FFE8DC',
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#FF6B35',
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
   },
   proteinIcon: {
     fontSize: 24,

@@ -31,7 +31,9 @@ export const getProductImageUrl = (
  * Fetches all products from the API
  */
 export const fetchProducts = async (): Promise<Product[]> => {
-  const response = await api.get<ProductsResponse>('/products');
+  const response = await api.get<ProductsResponse>('/products', {
+    params: { per_page: 100 },
+  });
   return response.data.data;
 };
 
